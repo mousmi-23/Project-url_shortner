@@ -26,12 +26,6 @@ const createShortUrl = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please put the longUrl" })
         }
 
-        let cachedData = await redisService.GET_ASYNC(`${longUrl}`)
-        if (cachedData) {
-            console.log("redis work...")
-            return res.status(201).send({ status: true, message: "Success [Redis]", data: JSON.parse(cachedData) })
-        }
-
         if (!(/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/.test(longUrl))) {
             return res.status(400).send({ status: false, message: "Please enter a valid URL" })
         }
@@ -42,35 +36,44 @@ const createShortUrl = async function (req, res) {
             }
         }
 
-        let urlCode = shortid.generate().toLowerCase()
-
-        const shortUrl = baseUrl + '/' + urlCode
-        data.shortUrl = shortUrl
-        data.urlCode = urlCode
-
-        const findUrl = await urlModel.findOne({ longUrl: longUrl })
-        if (findUrl) {
-            const checkUrl = {
-                longUrl: findUrl.longUrl,
-                shortUrl: findUrl.shortUrl,
-                urlCode: findUrl.urlCode
+        let cachedData = await redisService.GET_ASYNC(`${longUrl}`)
+        if (cachedData) {
+            console.log("redis work...")
+            return res.status(200).send({ status: true, message: "Success [Redis]", data: JSON.parse(cachedData) })
+        }
+        else {
+            const findUrl = await urlModel.findOne({ longUrl: longUrl })
+            if (findUrl) {
+                const checkUrl = {
+                    longUrl: findUrl.longUrl,
+                    shortUrl: findUrl.shortUrl,
+                    urlCode: findUrl.urlCode
+                }
+                console.log("mondoDB Data...")
+                return res.status(201).send({ status: true, message: "Success [MondoDB]", data: checkUrl })
             }
-            console.log("mondoDB Data...")
-            return res.status(201).send({ status: true, message: "Success [MondoDB]", data: checkUrl })
+            else {
+
+                let urlCode = shortid.generate().toLowerCase()
+
+                const shortUrl = baseUrl + '/' + urlCode
+                data.shortUrl = shortUrl
+                data.urlCode = urlCode
+
+                const createUrl = await urlModel.create(data)
+
+                const urlData = {
+                    longUrl: longUrl,
+                    shortUrl: shortUrl,
+                    urlCode: urlCode
+                }
+
+                await redisService.SET_ASYNC(`${urlData.longUrl}`, JSON.stringify(urlData), 'EX', 60 * 60 * 24)
+                await redisService.SET_ASYNC(`${urlData.urlCode}`, urlData.longUrl, 'EX', 60 * 60 * 24)
+                console.log("mondoDB work...")
+                return res.status(201).send({ status: true, message: "Success [MongoDB]", data: urlData })
+            }
         }
-
-        const createUrl = await urlModel.create(data)
-
-        const urlData = {
-            longUrl: longUrl,
-            shortUrl: shortUrl,
-            urlCode: urlCode
-        }
-        await redisService.SET_ASYNC(`${urlData.longUrl}`, JSON.stringify(urlData), 'EX', 60 * 60 * 24)
-        await redisService.SET_ASYNC(`${urlData.urlCode}`, urlData.longUrl, 'EX', 60 * 60 * 24)
-        console.log("mondoDB work...")
-        return res.status(201).send({ status: true, message: "Success [MongoDB]", data: urlData })
-
     } catch (err) {
         return res.status(500).send({ status: false, msg: 'Server Error' })
     }
