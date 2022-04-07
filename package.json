@@ -1,0 +1,34 @@
+{
+  "name": "project-url_shortner",
+  "version": "1.0.0",
+  "description": "URL shortening is used to create shorter aliases for long URLs. We call these shortened aliases “short links.” Users are redirected to the original URL when they hit these short links. Short links save a lot of space when displayed, printed, messaged, or tweeted. Additionally, users are less likely to mistype shorter URLs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mousmi-23/Project-url_shortner.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mousmi-23/Project-url_shortner/issues"
+  },
+  "homepage": "https://github.com/mousmi-23/Project-url_shortner#readme",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "ioredis": "^5.0.3",
+    "mongoose": "^6.2.9",
+    "nodemon": "^2.0.15",
+    "redis": "^3.1.2",
+    "shortid": "^2.2.16",
+    "valid-url": "^1.0.9",
+    "validator": "^13.7.0"
+  }
+}
