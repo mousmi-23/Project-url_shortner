@@ -1,7 +1,6 @@
 const urlModel = require("../model/urlModel")
 const shortid = require('shortid')
 const redisService = require('../redis/redisService')
-const { worker } = require("shortid");
 
 
 const isValid = function (value) {
@@ -30,10 +29,8 @@ const createShortUrl = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please enter a valid URL" })
         }
 
-        if (keys.length > 0) {
-            if (!(keys.length == 1 && keys == 'longUrl')) {
-                return res.status(400).send({ status: false, message: "Only longUrl field is allowed" })
-            }
+        if (!(keys.length == 1 && keys == 'longUrl')) {
+            return res.status(400).send({ status: false, message: "Only longUrl field is allowed" })
         }
 
         let cachedData = await redisService.GET_ASYNC(`${longUrl}`)

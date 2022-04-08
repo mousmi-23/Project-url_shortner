@@ -23,7 +23,7 @@ const urlSchema = new mongoose.Schema({
         required : true,
         unique : true,
         trim : true
-     }
+    }
 
 }, { timestamps : true })
 
